@@ -1,11 +1,12 @@
 import Vue from 'vue';
-import {CascaderPanel, Tooltip, Popover, Autocomplete, Tag} from 'element-ui'
+import {Cascader,CascaderPanel, Tooltip, Popover, Autocomplete, Tag} from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
 import {getVal} from '@/utils/arr'
 
 import App from './App.vue';
 
+Vue.use(Cascader)
 Vue.use(CascaderPanel)
 Vue.use(Tooltip)
 Vue.use(Popover)
