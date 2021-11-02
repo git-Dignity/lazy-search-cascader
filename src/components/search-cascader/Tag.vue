@@ -23,7 +23,7 @@
         disable-transitions
         v-show="labelArray.length > 0"
       >
-        <span> {{ getVal(labelArray, '0', 'label', 2) }}</span>
+        <span> {{ getVal(labelArray, "0", "label", 2) }}</span>
       </el-tag>
       <el-tag
         class="lazy-cascader-tag"
@@ -43,20 +43,27 @@ export default {
   props: {
     showAllLevels: {
       type: Boolean,
-      default: true
+      default: true,
     },
     labelArray: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     separator: {
       type: String,
-      default: ' > '
-    }
+      default: " > ",
+    },
   },
   data() {
     return {}
-  }
+  },
+  methods: {
+    //删除多选值
+    /**删除**/
+    handleClose(item) {
+      this.$emit("close", item)
+    },
+  },
 }
 </script>
 

@@ -5,6 +5,7 @@ const { VueLoaderPlugin } = require("vue-loader")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 
 module.exports = {
+ 
   entry: ["@babel/polyfill", "./src/main.js"],
   output: {
     path: path.resolve(__dirname + "/dist"),

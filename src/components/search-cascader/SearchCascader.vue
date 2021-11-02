@@ -13,6 +13,7 @@
           :showAllLevels="showAllLevels"
           :labelArray="labelArray"
           :separator="separator"
+          @close="handleClose"
         />
       </div>
       <div class="lazy-cascader-label" v-else>
@@ -79,6 +80,7 @@
             :showAllLevels="showAllLevels"
             :labelArray="labelArray"
             :separator="separator"
+            @close="handleClose"
           />
         </div>
         <div class="lazy-cascader-label" v-else>
@@ -130,6 +132,7 @@ export default {
     },
     // 是否开启搜索
     filterable: Boolean,
+    // 是否支持清空选项
     clearable: Boolean,
     disabled: Boolean,
     // 输入框中是否显示选中值的完整路径
@@ -137,6 +140,7 @@ export default {
       type: Boolean,
       default: true
     },
+    // 为el-cascader-panel级联面板添加class
     popperClass: {
       type: String,
       default: 'popperScascader'
@@ -147,6 +151,7 @@ export default {
         return {}
       }
     },
+    // 搜索下拉列表的类名
     suggestionsPopperClass: {
       type: String,
       default: 'suggestions-popper-class'
@@ -427,7 +432,7 @@ export default {
     },
     //删除多选值
     /**删除**/
-    handleClose(item) {
+    handleClose(item, eee) {
       let index = this.current.findIndex(obj => {
         return obj.join() == item.value.join()
       })

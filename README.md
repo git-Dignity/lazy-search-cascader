@@ -3,9 +3,9 @@
 
 
 
-# lazy-cascader
+# lazy-search-cascader
 
-> ElementUI 级联选择组件（Cascader）懒加载的拓展 
+> ElementUI 级联选择组件（Cascader）懒加可搜索的拓展 
 
 
  ![image.png](https://upload-images.jianshu.io/upload_images/80274-8e35b51d940a39fa.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)

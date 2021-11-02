@@ -1,48 +1,49 @@
 <template>
   <div class="condition">
     <lazy-cascader
-          filterable
-          :width="'400px'"
-          :searchWidth="'590px'"
-          :props="props2"
-          :disabled="classify == 'type'"
-          :show-all-levels="false"
-          :placeholder="'全省流域'"
-          clearable
-          @change="cascaderChange"
-          class="margin-left-10 provinceScascader"
-          :popper-class="'provincePopperScascader'"
-          ref="lazyCascader"
-        ></lazy-cascader>
+      filterable
+      :width="'400px'"
+      :searchWidth="'590px'"
+      :props="props2"
+      :disabled="classify == 'type'"
+      :show-all-levels="false"
+      :placeholder="'全省流域'"
+      clearable
+      @change="cascaderChange"
+      class="margin-left-10 provinceScascader"
+      :popper-class="'provincePopperScascader'"
+      ref="lazyCascader"
+    ></lazy-cascader>
   </div>
 </template>
 
 <script>
-import { fieldReplace, getReservoirType, strRemoveNum } from '@/utils/arr'
-import lazyCascader from '@/components/search-cascader'
-import axios from 'axios'
+import { fieldReplace, getReservoirType, strRemoveNum } from "@/utils/arr"
+import { dataJson } from "../data/data.js"
+import lazyCascader from "@/components/search-cascader"
+import axios from "axios"
 
 export default {
-    components:{
-        lazyCascader
-    },
+  components: {
+    lazyCascader,
+  },
   data() {
     return {
-        basinAndTypeCancel: axios.CancelToken.source(),
-        current: [],
+      basinAndTypeCancel: axios.CancelToken.source(),
+      current: [],
       options: [],
       props2: {
         multiple: true,
         checkStrictly: false,
-        value: 'id',
-        label: 'name',
-        leaf: 'leaf',
+        value: "id",
+        label: "name",
+        leaf: "leaf",
         lazyLoad: this.lazyLoad,
-        lazySearch: this.lazySearch
-      }
-    };
+        lazySearch: this.lazySearch,
+      },
+    }
   },
-  methods:{
+  methods: {
     /**
      * @description: 加载级联的方法
      * @param {*} node
@@ -51,11 +52,11 @@ export default {
      */
 
     lazyLoad(node, resolve) {
-      this.getCateList(node.value ? node.value : 0).then(res => {
+      this.getCateList(node.value ? node.value : 0).then((res) => {
         resolve(res)
       })
     },
-    
+
     /**
      * @description: 下拉框搜索
      * @param {*} queryString
@@ -64,65 +65,87 @@ export default {
      */
 
     lazySearch(queryString, callback) {
-      setTimeout(() => {
-        axios
-          .get('wcs/rras/reservoir/reservoir/page/searchReservoirInfoList', {
-            params: {
-              searchValue: queryString
-            }
-          })
-          .then(res => {
-            // console.log(res.data.data.list)
-            let result = this.getVal(res, 'data', 'data', 'list')
-            let tmp = []
-
-            if (result) {
-              result.forEach(r => {
-                tmp.push({
-                  id: [
-                    strRemoveNum(r.basincd),
-                    getReservoirType(r.encl),
-                    r.ennmcd
-                  ],
-                  name: [r.basinnm, r.enclDesc, r.ennm]
-                })
+      // console.log(dataJson, queryString);
+      let tmp = []
+      dataJson.forEach((d) => {
+        d.typeVoList.forEach((dt) => {
+          dt.voList.forEach((dtv) => {
+            if (dtv.ennm.indexOf(queryString) != -1) {
+              tmp.push({
+                id: [
+                  strRemoveNum(dtv.basincd),
+                  getReservoirType(dtv.encl),
+                  dtv.ennmcd,
+                ],
+                name: [dtv.basinnm, dtv.enclDesc, dtv.ennm],
               })
-              // console.log(tmp)
-              callback(tmp)
-            } else {
-              callback([])
             }
           })
-          .catch(e => {
-            callback([])
-          })
-      }, 200)
+        })
+      })
+      // console.log(tmp);
+      callback(tmp)
+
+      // 下面是真实请求接口的例子
+      // setTimeout(() => {
+      //   axios
+      //     .get("wcs/rras/reservoir/reservoir/page/searchReservoirInfoList", {
+      //       params: {
+      //         searchValue: queryString,
+      //       },
+      //     })
+      //     .then((res) => {
+      //       // console.log(res.data.data.list)
+      //       let result = this.getVal(res, "data", "data", "list")
+      //       let tmp = []
+
+      //       if (result) {
+      //         result.forEach((r) => {
+      //           tmp.push({
+      //             id: [
+      //               strRemoveNum(r.basincd),
+      //               getReservoirType(r.encl),
+      //               r.ennmcd,
+      //             ],
+      //             name: [r.basinnm, r.enclDesc, r.ennm],
+      //           })
+      //         })
+      //         // console.log(tmp)
+      //         callback(tmp)
+      //       } else {
+      //         callback([])
+      //       }
+      //     })
+      //     .catch((e) => {
+      //       callback([])
+      //     })
+      // }, 200)
     },
-    
+
     /**
      * @description: 获取下拉框数据
      * @param {*}
      * @return {*}
      */
     getTreeDate() {
-       
-const basinList = {
-  粤西沿海诸河水系: 'HG',
-  珠江三角洲: 'HD',
-  北江流域: 'HB',
-  东江流域: 'HC',
-  西江流域: 'HA',
-  韩江流域: 'HE'
-}
+      const basinList = {
+        粤西沿海诸河水系: "HG",
+        珠江三角洲: "HD",
+        北江流域: "HB",
+        东江流域: "HC",
+        西江流域: "HA",
+        韩江流域: "HE",
+      }
       return new Promise((resolve, reject) => {
-        this.groupReservoirByBasinAndType('HG,HD,HB,HC,HA,HE', '2,3,4')
-          .then(resBasin => {
+        this.groupReservoirByBasinAndType("HG,HD,HB,HC,HA,HE", "2,3,4")
+          .then((resBasin) => {
+            console.log(resBasin)
             let res = [
               {
-                name: '全省流域',
-                id: '',
-                children: []
-              }
+                name: "全省流域",
+                id: "",
+                children: [],
+              },
             ]
 
             // 第一级
@@ -131,13 +154,13 @@ const basinList = {
                 const element = basinList[key]
                 res[0].children.push({
                   name: key,
-                  id: element
+                  id: element,
                 })
               }
             }
 
             res[0].children.forEach((rc, rcIndex) => {
-              let basinnmIndex = ''
+              let basinnmIndex = ""
 
               resBasin.map((b, bIndex) => {
                 if (b.basinnm == rc.name) {
@@ -159,29 +182,29 @@ const basinList = {
 
               const fieldAll = [
                 {
-                  ennmcd: this.props2.value
+                  ennmcd: this.props2.value,
                 },
                 {
-                  ennm: this.props2.label
-                }
+                  ennm: this.props2.label,
+                },
               ]
 
               // 添加第二级及以下的孩子
               rc.children.push(
                 {
-                  name: '大型',
-                  id: '2',
+                  name: "大型",
+                  id: "2",
                   children:
                     mediumIndex === 2
                       ? fieldReplace(
                           resBasin[basinnmIndex].typeVoList[0].voList,
                           fieldAll
                         )
-                      : []
+                      : [],
                 },
                 {
-                  name: '中型',
-                  id: '3',
+                  name: "中型",
+                  id: "3",
                   children:
                     mediumIndex === 2
                       ? fieldReplace(
@@ -193,12 +216,12 @@ const basinList = {
                           resBasin[basinnmIndex].typeVoList[0].voList,
                           fieldAll
                         )
-                      : []
+                      : [],
                 },
 
                 {
-                  name: '小型',
-                  id: '4',
+                  name: "小型",
+                  id: "4",
                   children:
                     mediumIndex === 0
                       ? fieldReplace(
@@ -213,7 +236,7 @@ const basinList = {
                             resBasin[basinnmIndex].typeVoList.length - 1
                           ].voList.slice(0, 50),
                           fieldAll
-                        )
+                        ),
                 }
               )
             })
@@ -222,45 +245,50 @@ const basinList = {
             // console.log(this.options)
             resolve(true)
           })
-          .catch(e => {
+          .catch((e) => {
             console.log(e)
             reject(false)
           })
       })
     },
 
-    
     /**
+     * @do 将接口替换成死数据
      * @description: 水库蓄水统计-根据开始时间和结束时间两个时间点获取流域水库列表数据接口
      * @param {String} basincd 流域
      * @param {String} type 水库类型
      * @return {Array}
      */
     groupReservoirByBasinAndType(basincd, type) {
-      this.basinAndTypeCancel?.cancel()
-      this.basinAndTypeCancel = axios.CancelToken.source()
-
       return new Promise((resolve, reject) => {
-        let url ='wcs/rras/reservoir/reservoir/groupReservoirByBasinAndType'
-        let params = {
-          basincd,
-          type
-        }
-
-        axios
-          .get(url, {
-            params,
-            cancelToken: this.basinAndTypeCancel.token
-          })
-          .then(res => {
-            resolve(res.data.data)
-          })
-          .catch(e => {
-            resolve([])
-          })
+        resolve(dataJson)
       })
+
+      // 下面是真实请求接口的例子
+      // this.basinAndTypeCancel?.cancel()
+      // this.basinAndTypeCancel = axios.CancelToken.source()
+
+      // return new Promise((resolve, reject) => {
+      //   let url ='wcs/rras/reservoir/reservoir/groupReservoirByBasinAndType'
+      //   let params = {
+      //     basincd,
+      //     type
+      //   }
+
+      //   axios
+      //     .get(url, {
+      //       params,
+      //       cancelToken: this.basinAndTypeCancel.token
+      //     })
+      //     .then(res => {
+      //       resolve(res.data.data)
+      //     })
+      //     .catch(e => {
+      //       resolve([])
+      //     })
+      // })
     },
-    
+
     /**
      * @description: 获取节点数据
      * @param {*} parent
@@ -273,20 +301,20 @@ const basinList = {
         // 一开始没数据，拿this.options数据
         return new Promise((resolve, reject) => {
           this.getTreeDate()
-            .then(res => {
+            .then((res) => {
               // console.log(res)
               if (res) {
-                this.options.map(item => {
+                this.options.map((item) => {
                   let obj = {
                     id: item.id,
                     name: item.name,
-                    leaf: true
+                    leaf: true,
                   }
                   if (item.children && item.children.length > 0) {
                     obj.leaf = false
-                    item.children.map(ic => {
+                    item.children.map((ic) => {
                       if (ic.children && ic.children.length > 0) {
-                        ic.children.map(icc => {
+                        ic.children.map((icc) => {
                           icc.leaf = true
                         })
                       }
@@ -299,7 +327,7 @@ const basinList = {
                 resolve([])
               }
             })
-            .catch(e => {
+            .catch((e) => {
               resolve([])
             })
         })
@@ -307,11 +335,11 @@ const basinList = {
         return new Promise((resolve, reject) => {
           this.current = []
           this.findCate(parent, this.options)
-          this.current.map(item => {
+          this.current.map((item) => {
             let obj = {
               id: item.id,
               name: item.name,
-              leaf: true
+              leaf: true,
             }
             if (item.children && item.children.length > 0) {
               obj.leaf = false
@@ -333,60 +361,56 @@ const basinList = {
         }
       }
     },
-   
   },
-  created(){
-      
-  }
-};
+  created() {},
+}
 </script>
 
 <style lang="less" scoped>
+.condition {
+  // 1
+  // height: 60px;
+  // display: flex;
+  // align-items: center;
 
-  .condition {
-    height: 60px;
+  .dividing-line {
+    color: #e3eaf4;
+    font-size: larger;
+    margin: 0 20px;
+    &.last-line {
+      margin-left: 10px;
+    }
+  }
+  .btn {
     display: flex;
     align-items: center;
-
-    .dividing-line {
-      color: #e3eaf4;
-      font-size: larger;
-      margin: 0 20px;
-      &.last-line {
-        margin-left: 10px;
-      }
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 3px 8px;
+    border: 1px solid #cfd7e5;
+    font-weight: normal;
+    img {
+      width: 22px;
+      height: 22px;
     }
-    .btn {
+  }
+  .provinceScascader {
+    /deep/ .el-cascader__tags {
       display: flex;
-      align-items: center;
-      cursor: pointer;
-      border-radius: 3px;
-      padding: 3px 8px;
-      border: 1px solid #cfd7e5;
-      font-weight: normal;
-      img {
-        width: 22px;
-        height: 22px;
-      }
+      flex-wrap: nowrap;
     }
-    .provinceScascader {
-      /deep/ .el-cascader__tags {
-        display: flex;
-        flex-wrap: nowrap;
-      }
-      /deep/ .el-input__inner {
-        height: 30px !important;
-        width: 370px;
-      }
+    /deep/ .el-input__inner {
+      // height: 30px !important;  // 2
+      width: 370px;
     }
   }
-  .table-content {
-    display: flex;
-    justify-content: space-between;
-    height: calc(100% - 60px);
-  }
+}
+.table-content {
+  display: flex;
+  justify-content: space-between;
+  height: calc(100% - 60px);
+}
 </style>
-
 
 <style lang="less">
 // 蓄水统计 点击文字可选择
