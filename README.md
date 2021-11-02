@@ -7,18 +7,29 @@
 
 > ElementUI 级联选择组件（Cascader）懒加可搜索的拓展 
 
+标签全显示如下：
 
- ![image.png](https://upload-images.jianshu.io/upload_images/80274-8e35b51d940a39fa.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![1](https://gitee.com/zhengzem/graphic-bed/raw/master/img/20211102110852.png)
 
-# 为什么会有这个组件？
+标签只显示一行如下：
+
+![2](https://gitee.com/zhengzem/graphic-bed/raw/master/img/20211102110905.png)
+
+# 组件为何存在？
 
 首先我们要问ElementUI的Cascader级联选择器懒加载的时候有什么问题。
 
-1、为什么懒加载，多选的时候没有自带回显逻辑？
+1、基于Cascader 级联选择器组件添加搜索功能，搜索的时候调后端接口，官网搜索样式不适用
+
+官网搜索是前端实现的，但前端实现只能对目前已有数据进行搜索，就搜索不到以外的数据了。
+
 
 2、懒加载的时候怎么才能搜索出未加载的选项？
 
-为了解决这两个问题，我在网上翻了很多博客，虽然找到了回显的解决方案，但是似乎并不是很完美，或者有部分bug，甚至有些是无用的代码。
+搜索选中的话，如果级联选择组件数据没有这条数据的话，就往对应的层级数据push一条。
+
+
+为了解决这两个问题，所以他lazy-search-cascader来了。
 
 # 该组件如何使用？
 
@@ -27,7 +38,7 @@
 ```javascript
  
  //引入组件
-import lazyCascader from '@/components/search-cascader/SearchCascader'
+import lazyCascader from "@/components/search-cascader"
 
 //声明组件
 components: {
@@ -41,18 +52,19 @@ components: {
 ```html
 
 <lazy-cascader
-          filterable
-          :width="'2rem'"
-          :searchWidth="'2.95rem'"
-          :props="props2"
-          :disabled="classify == 'type'"
-          :show-all-levels="false"
-          :placeholder="'全省流域'"
-          clearable
-          @change="cascaderChange"
-          class="provinceScascader"
-          :popper-class="'provincePopperScascader'"
-        ></lazy-cascader>
+      filterable
+      :width="'400px'"
+      :searchWidth="'590px'"
+      :props="props2"
+      :disabled="classify == 'type'"
+      :show-all-levels="false"
+      :placeholder="'全省流域'"
+      clearable
+      @change="cascaderChange"
+      class="margin-left-10 provinceScascader"
+      :popper-class="'provincePopperScascader'"
+      ref="lazyCascader"
+    ></lazy-cascader>
 
 ```
 
@@ -62,6 +74,9 @@ components: {
 |v-model|选中项绑定值|-|-|-|
 |props|配置选项，具体见下表|object|-|-|
 |placeholder|输入框占位文本	|string|-|请选择|
+|separator|label连接符	|string|-|请选择|
+|showAllLevels|输入框中是否显示选中值的完整路径	|boolean|-|true|
+|popperClass|为el-cascader-panel级联面板添加class	|string|-|popperScascader|
 |disabled|是否禁用|boolean|-|false|
 |filterable|是否开启搜索|boolean|-|false|
 |clearable|是否支持清空选项|boolean|-|false|
@@ -92,7 +107,7 @@ lazySearch的callback返回一个数组，数组格式如下
 ```javascript
 
 //其中value和label键值同props配置项的参数一致
-[{value:[1,2,3,4],label:["服装鞋包", "流行男鞋", "凉鞋", "沙滩鞋"]}]
+[{value:['HD',2,'H415sds'],label:["珠江三角洲", "大型", "大河水库"]}]
 
 ```
 
